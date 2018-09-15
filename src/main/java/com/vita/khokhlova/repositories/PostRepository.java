@@ -4,14 +4,17 @@ import com.vita.khokhlova.EntityManagerFactorySingleton;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
 import com.vita.khokhlova.entities.*;
 import java.util.List;
 
 public class PostRepository {
 
     private EntityManager em = EntityManagerFactorySingleton.getEntityManager();
-    private String queryStart ="select b from Post b where b.user.id=";
+    private String queryStart ="select b from Post b";
+
+    public List<Post> getAll(){
+        return em.createQuery(queryStart).getResultList();
+    }
 
     public Post getById(int postid) {
         return  em.find(Post.class,postid);
@@ -19,7 +22,7 @@ public class PostRepository {
 
 
     public List<Post> getComments(int postid){
-        return em.createQuery("select b from Post b where b.parent.id=" + postid + " ORDER by b.id DESC").getResultList();
+        return em.find(Post.class,postid).getComments();
     }
 
 
@@ -38,6 +41,7 @@ public class PostRepository {
         try {
             tx.begin();
             em.persist(post);
+            em.refresh(post);
             tx.commit();
         }
         catch (Exception e) {
@@ -49,7 +53,8 @@ public class PostRepository {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(em.merge(post));
+                em.persist(em.merge(post));
+                em.refresh(post);
             tx.commit();
         }
         catch (Exception e) {

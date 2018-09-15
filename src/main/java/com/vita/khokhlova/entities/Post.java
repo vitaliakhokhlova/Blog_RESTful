@@ -1,5 +1,7 @@
 package com.vita.khokhlova.entities;
 
+import com.fasterxml.jackson.annotation.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,10 +26,13 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name="parentid")
+    @JsonBackReference
     private Post parent;
 
-//    @OneToMany(mappedBy="parent")
-//    private List<Post> comments = new ArrayList<Post>();
+    @OneToMany(mappedBy="parent", cascade = CascadeType.ALL)
+    private List<Post> comments = new ArrayList<Post>();
+
+    public Post(){}
 
     public Integer getId() {
         return id;
@@ -44,8 +49,6 @@ public class Post {
     public void setText(String text) {
         this.text = text;
     }
-
-
 
     public Date getDate() {
         return date;
@@ -72,18 +75,18 @@ public class Post {
 	}
 
     public Post getParent() {
-        return parent;
+            return parent;
     }
 
     public void setParent(Post parent) {
         this.parent = parent;
     }
 
-//    public List<Post> getComments() {
-//        return comments;
-//    }
-//
-//    public void setComments(List<Post> comments) {
-//        this.comments = comments;
-//    }
+    public List<Post> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Post> comments) {
+        this.comments = comments;
+    }
 }

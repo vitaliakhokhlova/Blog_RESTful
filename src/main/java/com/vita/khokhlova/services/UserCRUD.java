@@ -1,6 +1,7 @@
 package com.vita.khokhlova.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -21,10 +22,30 @@ public class UserCRUD {
 
     private UserRepository userRepository = new UserRepository();
 
+    @POST
+    @Path("/login")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public User login(User user) {
+        return userRepository.login(user);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<User> getAll() {
         return userRepository.getAll();
+    }
+
+    @GET
+    @Path("/{id}/mypage")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Post> getMyPage(@PathParam("id") int id) {
+        return userRepository.getMyPage(id)
+                .stream()
+                .filter(post -> (post != null))
+                .filter(post -> (post.getParent() != null))
+                .filter(post -> (post.getParent().getId() == 0))
+                .collect(Collectors.toList());
     }
 
     @GET
@@ -35,35 +56,24 @@ public class UserCRUD {
     }
 
     @GET
-    @Path("/{id}/mypage")
+    @Path("/{id}/mywall")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Post> getMyPage(@PathParam("id") int id)
-    {
-        return userRepository.getMyPage(id);
-    }
-
-    public List<Post> getMyWall(int userid){
+    public List<Post> getMyWall(@PathParam("id") int userid){
         UserRepository userRepository = new UserRepository();
-        //List<User> friends = userRepository.getFriends(userid);
+        List<User> friends = userRepository.getFriends(userid);
         List<Post> wall = getMyPage(userid);
-//    	for (User f : friends) {
-//    		wall.addAll(em.createQuery(this.queryStart +  f.getId()).getResultList());
-//    	}
+    	for (User f : friends) {
+            wall.addAll(getMyPage(f.getId()));
+        }
         return wall;
     }
-//    @GET
-//    @Path("/{id}/mypage")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public List<Post> getMyPage(@PathParam("id") int id) {
-//        return userRepository.getMyPage(id);
-//    }
 
-//	@GET
-//	@Path("/{id}/friendlist")
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public List<User> getFriends(@PathParam("id") int id) {
-//		return userRepository.getFriends(id);
-//	}
+	@GET
+	@Path("/{id}/friendlist")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<User> getFriends(@PathParam("id") int id) {
+		return userRepository.getFriends(id);
+	}
 
 
     @POST
@@ -71,6 +81,13 @@ public class UserCRUD {
     public User create(User user) {
         userRepository.create(user);
         return user;
+    }
+
+    @PUT
+    @Path("/{userid}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public User addFriend(@PathParam("userid") int userid, User friend) {
+        return userRepository.addFriend(userid, friend);
     }
 
     @DELETE
@@ -91,7 +108,6 @@ public class UserCRUD {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
     public User update(User user) {
         User bexists = userRepository.getById(user.getId());
         String s = bexists.toString();
@@ -99,12 +115,5 @@ public class UserCRUD {
         return user	;
     }
 
-    @POST
-    @Path("/login")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public User login(User user) {
-        return userRepository.login(user);
-    }
 
 }

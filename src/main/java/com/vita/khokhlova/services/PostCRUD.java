@@ -13,6 +13,12 @@ public class PostCRUD {
 
     private PostRepository postRepository = new PostRepository();
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Post> getAll() {
+        return postRepository.getAll();
+    }
+
 
 
     @GET

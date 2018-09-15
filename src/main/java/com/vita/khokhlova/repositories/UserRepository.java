@@ -15,22 +15,14 @@ public class UserRepository {
         return em.createQuery("select u from User u").getResultList();
     }
 
-    public List<Post> getMyPage(int userid){
-        return em.createQuery("select b from Post b where b.user.id=" + userid + " and b.parent.id=0 ORDER by b.id DESC").getResultList();
-    }
-
-
     public User getById(int id) {
         return  em.find(User.class,id);
     }
 
-
-
-
-//    public List<User> getFriends(int id) {
-//    	User user = em.find(User.class,id);
-//        return user.getFriends();
-//    }
+    public List<User> getFriends(int id) {
+    	User user = em.find(User.class,id);
+        return user.getFriends();
+    }
 
 
     public void create(User user) {
@@ -68,9 +60,34 @@ public class UserRepository {
         }
     }
 
+    public User addFriend(int id, User friend) {
+        User user = em.find(User.class,id);
+        System.out.println(id);
+        List<User> friendList = user.getFriends();
+        System.out.println(friendList);
+        friendList.add(friend);
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(em.merge(user));
+            tx.commit();
+        }
+        catch (Exception e) {
+            tx.rollback();
+        }
+        return user;
+    }
+
     public User login(User user){
         List<User> list = em.createQuery("select p from User p where upper(p.email)  like '" + user.getEmail().toUpperCase() + "' and p.password like '"+user.getPassword()+"'").getResultList();
         return list.get(0);
     }
 
+    public List<Post> getMyPage(int id) {
+
+        User user = em.find(User.class,id);
+        List<Post> myPage= user.getPosts();
+
+        return myPage;
+    }
 }

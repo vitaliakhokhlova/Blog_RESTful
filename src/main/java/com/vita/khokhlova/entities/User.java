@@ -1,13 +1,13 @@
 package com.vita.khokhlova.entities;
 
+import com.fasterxml.jackson.annotation.*;
+
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @Table(name="users")
 public class User  {
-
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -26,16 +26,15 @@ public class User  {
     @Column(nullable=false)
     private String lastname;
 
-//	@OneToMany(mappedBy="user",fetch=FetchType.LAZY)
-//	private List<Post> posts;
+	@OneToMany(mappedBy="user",fetch=FetchType.LAZY)
+    @JsonIgnore
+	private List<Post> posts;
 
-    //	@OneToMany(mappedBy="user")
-//	private List<Comment> comments;
-//
     @JoinTable(name = "friends", joinColumns = {
-            @JoinColumn(name = "id1", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
-            @JoinColumn(name = "id2", referencedColumnName = "id", nullable = false)})
+            @JoinColumn(name = "reader", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
+            @JoinColumn(name = "writer", referencedColumnName = "id", nullable = false)})
     @ManyToMany
+    @JsonBackReference
     private List<User> friends;
 
     public User() {
@@ -87,25 +86,19 @@ public class User  {
                 + ", lastname=" + lastname + "]";
     }
 
-//	public List<Post> getPosts() {
-//		return posts;
-//	}
-//
-//	public void setPosts(List<Post> posts) {
-//		this.posts = posts;
-//	}
+	public List<Post> getPosts() {
+		return posts;
+	}
 
-    //	public List<Comment> getComments() {
-//		return comments;
-//	}
-//
-//	public void setComments(List<Comment> comments) {
-//		this.comments = comments;
-//	}
-//
-    public List<User> getFriends() {
-        return friends;
-    }
+	public void setPosts(List<Post> posts) {
+		this.posts = posts;
+	}
+
+
+
+        public List<User> getFriends() {
+            return friends;
+        }
 
     public void setFriends(List<User> friends) {
         this.friends = friends;
